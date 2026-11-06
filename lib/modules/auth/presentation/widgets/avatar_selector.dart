@@ -1,0 +1,158 @@
+import 'package:flutter/material.dart';
+import 'package:movies/core/theme/app_colors.dart';
+import 'package:movies/l10n/app_localizations.dart';
+
+class AvatarSelector extends StatefulWidget {
+  static const List<String> avatars = [
+    'https://avatar.iran.liara.run/public/boy?username=alex',
+    'https://avatar.iran.liara.run/public/boy?username=sam',
+    'https://avatar.iran.liara.run/public/boy?username=john',
+    'https://avatar.iran.liara.run/public/girl?username=lisa',
+    'https://avatar.iran.liara.run/public/girl?username=maya',
+    'https://avatar.iran.liara.run/public/boy?username=david',
+    'https://avatar.iran.liara.run/public/girl?username=sara',
+    'https://avatar.iran.liara.run/public/boy?username=chris',
+    'https://avatar.iran.liara.run/public/girl?username=emma',
+  ];
+
+  final ValueChanged<int>? onAvatarSelected;
+  final int initialIndex;
+
+  const AvatarSelector({
+    super.key,
+    this.onAvatarSelected,
+    this.initialIndex = 1,
+  });
+
+  @override
+  State<AvatarSelector> createState() => _AvatarSelectorState();
+}
+
+class _AvatarSelectorState extends State<AvatarSelector> {
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  List<String> get _avatars => AvatarSelector.avatars;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(
+      viewportFraction: 0.38,
+      initialPage: _currentIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final avatarLabel = AppLocalizations.of(context)!.avatarLabel;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 120,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _avatars.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+              widget.onAvatarSelected?.call(index);
+            },
+            itemBuilder: (context, index) {
+              final isSelected = index == _currentIndex;
+              final size = isSelected ? 110.0 : 78.0;
+
+              return Center(
+                child: GestureDetector(
+                  onTap: () {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected ? AppColors.yellow : Colors.transparent,
+                        width: isSelected ? 2.5 : 0,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.yellow.withValues(alpha: 0.3),
+                                blurRadius: 12,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: ClipOval(
+                      child: Image.network(
+                        _avatars[index],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: AppColors.gray,
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.person,
+                              color: isSelected
+                                  ? AppColors.yellow
+                                  : AppColors.white.withValues(alpha: 0.6),
+                              size: size * 0.5,
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: AppColors.gray,
+                            alignment: Alignment.center,
+                            child: const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.yellow,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          avatarLabel,
+          style: const TextStyle(
+            color: AppColors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
