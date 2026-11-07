@@ -527,8 +527,68 @@ abstract class AppLocalizations {
   /// No description provided for @noMoviesYet.
   ///
   /// In en, this message translates to:
-  /// **'Movies will appear here when the catalog is connected.'**
+  /// **'No movies found.'**
   String get noMoviesYet;
+
+  /// No description provided for @movieLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load movies. Check your connection and try again.'**
+  String get movieLoadError;
+
+  /// No description provided for @screenShots.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen Shots'**
+  String get screenShots;
+
+  /// No description provided for @similarMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar'**
+  String get similarMovies;
+
+  /// No description provided for @movieSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get movieSummary;
+
+  /// No description provided for @cast.
+  ///
+  /// In en, this message translates to:
+  /// **'Cast'**
+  String get cast;
+
+  /// No description provided for @genres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get genres;
+
+  /// No description provided for @watchMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch'**
+  String get watchMovie;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesShort;
+
+  /// No description provided for @summaryUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary is unavailable.'**
+  String get summaryUnavailable;
+
+  /// No description provided for @trailerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Trailer is unavailable.'**
+  String get trailerUnavailable;
 
   /// No description provided for @emptyWatchlist.
   ///

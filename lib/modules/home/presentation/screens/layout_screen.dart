@@ -9,10 +9,12 @@ import 'package:movies/modules/auth/domain/entities/app_user.dart';
 import 'package:movies/modules/auth/presentation/manager/auth_cubit.dart';
 import 'package:movies/modules/auth/presentation/manager/auth_state.dart';
 import 'package:movies/modules/auth/presentation/utils/auth_error_localizer.dart';
-import 'package:movies/modules/home/presentation/manager/home_cubit.dart';
-import 'package:movies/modules/home/presentation/manager/home_state.dart';
+import 'package:movies/modules/home/presentation/manager/movie_cubit.dart';
+import 'package:movies/modules/home/presentation/manager/movie_state.dart';
+import 'package:movies/modules/home/domain/entities/movie.dart';
 import 'package:movies/modules/home/presentation/screens/browse_screen.dart';
 import 'package:movies/modules/home/presentation/screens/home_screen.dart';
+import 'package:movies/modules/home/presentation/screens/movie_details_screen.dart';
 import 'package:movies/modules/home/presentation/screens/profile_screen.dart';
 import 'package:movies/modules/home/presentation/screens/search_screen.dart';
 
@@ -32,12 +34,20 @@ class _LayoutScreenState extends State<LayoutScreen> {
 
   void _selectTab(int index) => setState(() => _selectedIndex = index);
 
+  void _openMovieDetails(BuildContext context, Movie movie) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MovieDetailsScreen(movie: movie),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<AuthCubit>()),
-        BlocProvider(create: (_) => sl<HomeCubit>()..loadHome()),
+        BlocProvider(create: (_) => sl<MoviesCubit>()..fetchMovies()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -55,29 +65,47 @@ class _LayoutScreenState extends State<LayoutScreen> {
             );
           }
         },
-        child: BlocBuilder<HomeCubit, HomeState>(
+        child: BlocBuilder<MoviesCubit, MoviesState>(
           builder: (context, state) {
-            final loaded = state is HomeLoadedState ? state : null;
-            final errorMessage =
-                state is HomeErrorState ? state.message : null;
-            final isLoading = state is HomeLoadingState;
+            final loaded = state is MoviesLoaded ? state : null;
+            final errorMessage = state is MoviesError
+                ? AppLocalizations.of(context)!.movieLoadError
+                : null;
+            final isLoading = state is MoviesLoading;
+            final homeMovies = loaded?.movies ?? const [];
+            final homeCubit = context.read<MoviesCubit>();
             final pages = [
-              HomeScreen(
-                featuredMovies: loaded?.featuredMovies ?? const [],
-                actionMovies: loaded?.actionMovies ?? const [],
-                isLoading: isLoading,
-                errorMessage: errorMessage,
-                onRetry: context.read<HomeCubit>().loadHome,
-                onSearchTap: () => _selectTab(1),
-                onBrowseTap: () => _selectTab(2),
+              BlocProvider(
+                create: (_) => sl<MoviesCubit>()..fetchMovies(genre: 'Action'),
+                child: BlocBuilder<MoviesCubit, MoviesState>(
+                  builder: (context, actionState) {
+                    final actionMovies = actionState is MoviesLoaded
+                        ? actionState.movies
+                        : const <Movie>[];
+                    return HomeScreen(
+                      featuredMovies: homeMovies,
+                      actionMovies: actionMovies,
+                      isLoading: isLoading || actionState is MoviesLoading,
+                      errorMessage: errorMessage,
+                      onRetry: homeCubit.fetchMovies,
+                      onSearchTap: () => _selectTab(1),
+                      onBrowseTap: () => _selectTab(2),
+                      onMovieTap: (movie) => _openMovieDetails(context, movie),
+                    );
+                  },
+                ),
               ),
-              const SearchScreen(),
-              BrowseScreen(
-                allMovies: loaded?.featuredMovies ?? const [],
-                actionMovies: loaded?.actionMovies ?? const [],
-                isLoading: isLoading,
-                errorMessage: errorMessage,
-                onRetry: context.read<HomeCubit>().loadHome,
+              BlocProvider(
+                create: (_) => sl<MoviesCubit>()..fetchMovies(),
+                child: SearchScreen(
+                  onMovieTap: (movie) => _openMovieDetails(context, movie),
+                ),
+              ),
+              BlocProvider(
+                create: (_) => sl<MoviesCubit>()..fetchMovies(),
+                child: BrowseScreen(
+                  onMovieTap: (movie) => _openMovieDetails(context, movie),
+                ),
               ),
               ProfileScreen(user: widget.user),
             ];

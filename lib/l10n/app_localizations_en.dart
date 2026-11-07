@@ -234,8 +234,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popularMovies => 'Popular movies';
 
   @override
-  String get noMoviesYet =>
-      'Movies will appear here when the catalog is connected.';
+  String get noMoviesYet => 'No movies found.';
+
+  @override
+  String get movieLoadError =>
+      'Couldn\'t load movies. Check your connection and try again.';
+
+  @override
+  String get screenShots => 'Screen Shots';
+
+  @override
+  String get similarMovies => 'Similar';
+
+  @override
+  String get movieSummary => 'Summary';
+
+  @override
+  String get cast => 'Cast';
+
+  @override
+  String get genres => 'Genres';
+
+  @override
+  String get watchMovie => 'Watch';
+
+  @override
+  String get minutesShort => 'min';
+
+  @override
+  String get summaryUnavailable => 'Summary is unavailable.';
+
+  @override
+  String get trailerUnavailable => 'Trailer is unavailable.';
 
   @override
   String get emptyWatchlist => 'Your watchlist is empty for now.';

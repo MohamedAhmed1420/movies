@@ -8,6 +8,7 @@ class FeaturedMovieCarousel extends StatelessWidget {
   final List<Movie> movies;
   final String availableNowLabel;
   final String watchNowLabel;
+  final ValueChanged<Movie>? onMovieTap;
 
   const FeaturedMovieCarousel({
     super.key,
@@ -15,6 +16,7 @@ class FeaturedMovieCarousel extends StatelessWidget {
     required this.movies,
     required this.availableNowLabel,
     required this.watchNowLabel,
+    this.onMovieTap,
   });
 
   @override
@@ -77,7 +79,12 @@ class FeaturedMovieCarousel extends StatelessWidget {
                 itemCount: carouselMovies.length,
                 itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 7),
-                  child: FeaturedPosterCard(movie: carouselMovies[index]),
+                  child: FeaturedPosterCard(
+                    movie: carouselMovies[index],
+                    onTap: onMovieTap == null
+                        ? null
+                        : () => onMovieTap!(carouselMovies[index]),
+                  ),
                 ),
               ),
             ),
@@ -108,16 +115,19 @@ class FeaturedMovieCarousel extends StatelessWidget {
 
 class FeaturedPosterCard extends StatelessWidget {
   final Movie movie;
+  final VoidCallback? onTap;
 
-  const FeaturedPosterCard({super.key, required this.movie});
+  const FeaturedPosterCard({super.key, required this.movie, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       image: true,
       label: movie.title,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+      child: GestureDetector(
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -139,6 +149,7 @@ class FeaturedPosterCard extends StatelessWidget {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -147,11 +158,13 @@ class FeaturedPosterCard extends StatelessWidget {
 class SmallMoviePosterCard extends StatelessWidget {
   final Movie movie;
   final double width;
+  final ValueChanged<Movie>? onTap;
 
   const SmallMoviePosterCard({
     super.key,
     required this.movie,
     required this.width,
+    this.onTap,
   });
 
   @override
@@ -161,7 +174,9 @@ class SmallMoviePosterCard extends StatelessWidget {
       label: movie.title,
       child: SizedBox(
         width: width,
-        child: ClipRRect(
+        child: GestureDetector(
+          onTap: onTap == null ? null : () => onTap!(movie),
+          child: ClipRRect(
           borderRadius: BorderRadius.circular(13),
           child: Stack(
             fit: StackFit.expand,
@@ -190,6 +205,7 @@ class SmallMoviePosterCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

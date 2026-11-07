@@ -234,7 +234,38 @@ class AppLocalizationsAr extends AppLocalizations {
   String get popularMovies => 'أفلام مشهورة';
 
   @override
-  String get noMoviesYet => 'ستظهر الأفلام هنا بعد ربط دليل الأفلام.';
+  String get noMoviesYet => 'لا توجد أفلام.';
+
+  @override
+  String get movieLoadError =>
+      'تعذر تحميل الأفلام. تحقق من الاتصال وحاول مجددًا.';
+
+  @override
+  String get screenShots => 'لقطات من الفيلم';
+
+  @override
+  String get similarMovies => 'أفلام مشابهة';
+
+  @override
+  String get movieSummary => 'القصة';
+
+  @override
+  String get cast => 'طاقم التمثيل';
+
+  @override
+  String get genres => 'التصنيفات';
+
+  @override
+  String get watchMovie => 'شاهد';
+
+  @override
+  String get minutesShort => 'دقيقة';
+
+  @override
+  String get summaryUnavailable => 'ملخص الفيلم غير متوفر.';
+
+  @override
+  String get trailerUnavailable => 'الإعلان غير متوفر.';
 
   @override
   String get emptyWatchlist => 'قائمة مشاهدتك فارغة حاليًا.';

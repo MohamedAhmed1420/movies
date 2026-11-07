@@ -1,46 +1,39 @@
 import 'package:movies/modules/home/domain/entities/movie.dart';
 
 class MovieModel extends Movie {
-  static const _posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
-
   const MovieModel({
     required super.id,
     required super.title,
+    required super.summary,
     required super.posterUrl,
     required super.rating,
-    super.overview,
   });
 
   factory MovieModel.fromJson(Map<String, dynamic> json) {
-    final posterPath = json['poster_path'] as String?;
-    final rawTitle = json['title'] as String? ?? json['name'] as String? ?? '';
+    final rawId = json['id'];
+    if (rawId is! num) {
+      throw const FormatException('Movie response is missing a numeric id.');
+    }
+
+    final rawRating = json['rating'];
+    final rawSummary = json['summary'] ?? json['synopsis'];
 
     return MovieModel(
-      id: (json['id'] as num?)?.toInt() ?? 0,
-      title: rawTitle,
-      posterUrl: _posterUrl(posterPath),
-      rating: (json['vote_average'] as num?)?.toDouble() ?? 0,
-      overview: json['overview'] as String?,
+      id: rawId.toInt(),
+      title: json['title'] as String? ?? '',
+      summary: rawSummary is String ? rawSummary : '',
+      posterUrl: json['medium_cover_image'] as String? ??
+          json['large_cover_image'] as String? ??
+          '',
+      rating: rawRating is num ? rawRating.toDouble() : 0,
     );
   }
 
-  static String _posterUrl(String? path) {
-    if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return '$_posterBaseUrl$path';
-  }
-
-  Map<String, dynamic> toJson() {
-    final posterPath = posterUrl.startsWith(_posterBaseUrl)
-        ? posterUrl.substring(_posterBaseUrl.length)
-        : posterUrl;
-
-    return {
-      'id': id,
-      'title': title,
-      'poster_path': posterPath,
-      'vote_average': rating,
-      'overview': overview,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'summary': summary,
+        'medium_cover_image': posterUrl,
+        'rating': rating,
+      };
 }

@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onRetry;
   final VoidCallback onSearchTap;
   final VoidCallback onBrowseTap;
+  final ValueChanged<Movie>? onMovieTap;
 
   const HomeScreen({
     super.key,
@@ -22,6 +23,7 @@ class HomeScreen extends StatefulWidget {
     required this.onRetry,
     required this.onSearchTap,
     required this.onBrowseTap,
+    this.onMovieTap,
   });
 
   @override
@@ -80,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 movies: widget.featuredMovies,
                 availableNowLabel: localizations.availableNow,
                 watchNowLabel: localizations.watchNow,
+                onMovieTap: widget.onMovieTap,
               );
 
     return CustomScrollView(
@@ -144,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) => SmallMoviePosterCard(
                       movie: widget.actionMovies[index],
                       width: 98,
+                      onTap: widget.onMovieTap,
                     ),
                   ),
                 ),

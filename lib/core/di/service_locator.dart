@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 
 import '../../modules/auth/data/data_sources/auth_remote_data_source.dart';
 import '../../modules/auth/data/repositories/auth_repository_impl.dart';
@@ -12,13 +13,14 @@ import '../../modules/auth/domain/use_cases/send_password_reset_use_case.dart';
 import '../../modules/auth/domain/use_cases/sign_in_use_case.dart';
 import '../../modules/auth/domain/use_cases/sign_out_use_case.dart';
 import '../../modules/auth/presentation/manager/auth_cubit.dart';
-import '../../modules/home/data/data_sources/home_data_source.dart';
-import '../../modules/home/data/data_sources/home_preview_data_source.dart';
-import '../../modules/home/data/repositories/home_repository_impl.dart';
-import '../../modules/home/domain/repositories/home_repository.dart';
-import '../../modules/home/domain/use_cases/get_featured_movies_use_case.dart';
-import '../../modules/home/domain/use_cases/get_movies_by_genre_use_case.dart';
-import '../../modules/home/presentation/manager/home_cubit.dart';
+import '../../modules/home/data/data_sources/movie_remote_data_source.dart';
+import '../../modules/home/data/repositories/movie_repository_impl.dart';
+import '../../modules/home/domain/repositories/movie_repository.dart';
+import '../../modules/home/domain/use_cases/get_movies_use_case.dart';
+import '../../modules/home/domain/use_cases/get_movie_details_use_case.dart';
+import '../../modules/home/domain/use_cases/get_movie_suggestions_use_case.dart';
+import '../../modules/home/presentation/manager/movie_details_cubit.dart';
+import '../../modules/home/presentation/manager/movie_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -45,21 +47,33 @@ void setupDependencies() {
     () => SendPasswordResetUseCase(sl<AuthRepository>()),
   );
   sl.registerLazySingleton(() => SignOutUseCase(sl<AuthRepository>()));
-  sl.registerLazySingleton<HomeDataSource>(HomePreviewDataSource.new);
-  sl.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(sl<HomeDataSource>()),
+
+  sl.registerLazySingleton<http.Client>(() => http.Client());
+  sl.registerLazySingleton<MovieRemoteDataSource>(
+    () => MovieRemoteDataSourceImpl(client: sl<http.Client>()),
+  );
+  sl.registerLazySingleton<MovieRepository>(
+    () => MovieRepositoryImpl(
+      remoteDataSource: sl<MovieRemoteDataSource>(),
+    ),
   );
   sl.registerLazySingleton(
-    () => GetFeaturedMoviesUseCase(sl<HomeRepository>()),
+    () => GetMoviesUseCase(sl<MovieRepository>()),
   );
   sl.registerLazySingleton(
-    () => GetMoviesByGenreUseCase(sl<HomeRepository>()),
+    () => GetMovieDetailsUseCase(sl<MovieRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => GetMovieSuggestionsUseCase(sl<MovieRepository>()),
   );
   sl.registerFactory(
-    () => HomeCubit(
-      getFeaturedMoviesUseCase: sl(),
-      getMoviesByGenreUseCase: sl(),
+    () => MovieDetailsCubit(
+      getMovieDetailsUseCase: sl<GetMovieDetailsUseCase>(),
+      getMovieSuggestionsUseCase: sl<GetMovieSuggestionsUseCase>(),
     ),
+  );
+  sl.registerFactory(
+    () => MoviesCubit(getMoviesUseCase: sl<GetMoviesUseCase>()),
   );
 
   sl.registerFactory(
