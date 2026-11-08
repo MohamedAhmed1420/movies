@@ -9,6 +9,7 @@ class FeaturedMovieCarousel extends StatelessWidget {
   final String availableNowLabel;
   final String watchNowLabel;
   final ValueChanged<Movie>? onMovieTap;
+  final ValueChanged<Movie>? onPageChanged;
 
   const FeaturedMovieCarousel({
     super.key,
@@ -17,6 +18,7 @@ class FeaturedMovieCarousel extends StatelessWidget {
     required this.availableNowLabel,
     required this.watchNowLabel,
     this.onMovieTap,
+    this.onPageChanged,
   });
 
   @override
@@ -30,27 +32,6 @@ class FeaturedMovieCarousel extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              movies.first.posterUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) =>
-                  const ColoredBox(color: Color(0xFF303030)),
-            ),
-            ColoredBox(color: Colors.black.withValues(alpha: 0.70)),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xCC111111),
-                    Color(0x22111111),
-                    Color(0xCC111111),
-                  ],
-                  stops: [0, 0.48, 1],
-                ),
-              ),
-            ),
             Positioned(
               top: 8,
               left: 0,
@@ -77,6 +58,8 @@ class FeaturedMovieCarousel extends StatelessWidget {
               child: PageView.builder(
                 controller: controller,
                 itemCount: carouselMovies.length,
+                onPageChanged: (index) =>
+                    onPageChanged?.call(carouselMovies[index]),
                 itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 7),
                   child: FeaturedPosterCard(

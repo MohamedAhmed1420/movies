@@ -21,6 +21,7 @@ import '../../modules/home/domain/use_cases/get_movie_details_use_case.dart';
 import '../../modules/home/domain/use_cases/get_movie_suggestions_use_case.dart';
 import '../../modules/home/presentation/manager/movie_details_cubit.dart';
 import '../../modules/home/presentation/manager/movie_cubit.dart';
+import '../../modules/home/presentation/manager/home_categories_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -74,6 +75,9 @@ void setupDependencies() {
   );
   sl.registerFactory(
     () => MoviesCubit(getMoviesUseCase: sl<GetMoviesUseCase>()),
+  );
+  sl.registerFactory(
+    () => HomeCategoriesCubit(getMoviesUseCase: sl<GetMoviesUseCase>()),
   );
 
   sl.registerFactory(

@@ -34,3 +34,20 @@ class MoviesError extends MoviesState {
   @override
   List<Object?> get props => [message];
 }
+
+class MovieCategoriesLoaded extends MoviesState {
+  final List<Movie> actionMovies;
+  final List<Movie> comedyMovies;
+  final List<Movie> dramaMovies;
+
+  MovieCategoriesLoaded({
+    required Iterable<Movie> actionMovies,
+    required Iterable<Movie> comedyMovies,
+    required Iterable<Movie> dramaMovies,
+  }) : actionMovies = List.unmodifiable(actionMovies),
+       comedyMovies = List.unmodifiable(comedyMovies),
+       dramaMovies = List.unmodifiable(dramaMovies);
+
+  @override
+  List<Object?> get props => [actionMovies, comedyMovies, dramaMovies];
+}

@@ -9,6 +9,7 @@ import 'package:movies/modules/auth/domain/entities/app_user.dart';
 import 'package:movies/modules/auth/presentation/manager/auth_cubit.dart';
 import 'package:movies/modules/auth/presentation/manager/auth_state.dart';
 import 'package:movies/modules/auth/presentation/utils/auth_error_localizer.dart';
+import 'package:movies/modules/home/presentation/manager/home_categories_cubit.dart';
 import 'package:movies/modules/home/presentation/manager/movie_cubit.dart';
 import 'package:movies/modules/home/presentation/manager/movie_state.dart';
 import 'package:movies/modules/home/domain/entities/movie.dart';
@@ -18,7 +19,7 @@ import 'package:movies/modules/home/presentation/screens/movie_details_screen.da
 import 'package:movies/modules/home/presentation/screens/profile_screen.dart';
 import 'package:movies/modules/home/presentation/screens/search_screen.dart';
 
-const _screenBackground = Color(0xFF1C1C1C);
+const _screenBackground = AppColors.black;
 
 class LayoutScreen extends StatefulWidget {
   final AppUser user;
@@ -31,8 +32,15 @@ class LayoutScreen extends StatefulWidget {
 
 class _LayoutScreenState extends State<LayoutScreen> {
   int _selectedIndex = 0;
+  final ValueNotifier<String?> _homeBackgroundUrl = ValueNotifier(null);
 
   void _selectTab(int index) => setState(() => _selectedIndex = index);
+
+  @override
+  void dispose() {
+    _homeBackgroundUrl.dispose();
+    super.dispose();
+  }
 
   void _openMovieDetails(BuildContext context, Movie movie) {
     Navigator.of(context).push(
@@ -48,6 +56,9 @@ class _LayoutScreenState extends State<LayoutScreen> {
       providers: [
         BlocProvider(create: (_) => sl<AuthCubit>()),
         BlocProvider(create: (_) => sl<MoviesCubit>()..fetchMovies()),
+        BlocProvider(
+          create: (_) => sl<HomeCategoriesCubit>()..fetchHomeCategories(),
+        ),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -73,28 +84,44 @@ class _LayoutScreenState extends State<LayoutScreen> {
                 : null;
             final isLoading = state is MoviesLoading;
             final homeMovies = loaded?.movies ?? const [];
+            final initialBackgroundUrl = homeMovies.isEmpty
+                ? null
+                : homeMovies[homeMovies.length > 1 ? 1 : 0].posterUrl;
             final homeCubit = context.read<MoviesCubit>();
             final pages = [
-              BlocProvider(
-                create: (_) => sl<MoviesCubit>()..fetchMovies(genre: 'Action'),
-                child: BlocBuilder<MoviesCubit, MoviesState>(
-                  builder: (context, actionState) {
-                    final actionMovies = actionState is MoviesLoaded
-                        ? actionState.movies
-                        : const <Movie>[];
+              BlocBuilder<HomeCategoriesCubit, MoviesState>(
+                  builder: (context, categoriesState) {
+                    final categories = categoriesState is MovieCategoriesLoaded
+                        ? categoriesState
+                        : null;
+                    final categoriesErrorMessage =
+                        categoriesState is MoviesError
+                            ? AppLocalizations.of(context)!.movieLoadError
+                            : null;
+                    final categoriesCubit = context.read<HomeCategoriesCubit>();
+
                     return HomeScreen(
                       featuredMovies: homeMovies,
-                      actionMovies: actionMovies,
-                      isLoading: isLoading || actionState is MoviesLoading,
+                      actionMovies: categories?.actionMovies ?? const <Movie>[],
+                      comedyMovies: categories?.comedyMovies ?? const <Movie>[],
+                      dramaMovies: categories?.dramaMovies ?? const <Movie>[],
+                      isLoading: isLoading,
+                      categoriesLoading:
+                          categoriesState is MoviesLoading ||
+                          categoriesState is MoviesInitial,
                       errorMessage: errorMessage,
+                      categoriesErrorMessage: categoriesErrorMessage,
                       onRetry: homeCubit.fetchMovies,
+                      onRetryCategories: categoriesCubit.fetchHomeCategories,
                       onSearchTap: () => _selectTab(1),
                       onBrowseTap: () => _selectTab(2),
                       onMovieTap: (movie) => _openMovieDetails(context, movie),
+                      onFeaturedMovieChanged: (movie) {
+                        _homeBackgroundUrl.value = movie.posterUrl;
+                      },
                     );
                   },
                 ),
-              ),
               BlocProvider(
                 create: (_) => sl<MoviesCubit>()..fetchMovies(),
                 child: SearchScreen(
@@ -110,15 +137,61 @@ class _LayoutScreenState extends State<LayoutScreen> {
               ProfileScreen(user: widget.user),
             ];
 
-            return Scaffold(
-              backgroundColor: _screenBackground,
-              body: SafeArea(
+            return ValueListenableBuilder<String?>(
+              valueListenable: _homeBackgroundUrl,
+              child: SafeArea(
                 child: IndexedStack(index: _selectedIndex, children: pages),
               ),
-              bottomNavigationBar: _LayoutNavigationBar(
-                selectedIndex: _selectedIndex,
-                onSelected: _selectTab,
-              ),
+              builder: (context, selectedBackgroundUrl, child) {
+                final backgroundUrl = _selectedIndex == 0
+                    ? selectedBackgroundUrl ?? initialBackgroundUrl
+                    : null;
+
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (backgroundUrl != null)
+                      Positioned.fill(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 450),
+                          child: Image.network(
+                            key: ValueKey(backgroundUrl),
+                            backgroundUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) =>
+                                const ColoredBox(color: _screenBackground),
+                          ),
+                        ),
+                      ),
+                    if (backgroundUrl != null)
+                      const Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0xB8000000),
+                                Color(0xD9000000),
+                                Color(0xF2111111),
+                              ],
+                              stops: [0, 0.48, 1],
+                            ),
+                          ),
+                        ),
+                      ),
+                    Scaffold(
+                      extendBody: true,
+                      backgroundColor: Colors.transparent,
+                      body: child,
+                      bottomNavigationBar: _LayoutNavigationBar(
+                        selectedIndex: _selectedIndex,
+                        onSelected: _selectTab,
+                      ),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movies/core/routes/app_routes.dart';
 import 'package:movies/core/theme/app_colors.dart';
 import 'package:movies/l10n/app_localizations.dart';
+import 'package:movies/modules/onboarding/presentation/screens/dynamic_gradient_image_widget.dart';
 import 'package:movies/modules/onboarding/presentation/screens/onboarding_item.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -50,32 +51,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       OnboardingItem(
         title: localizations.findYourNextFavoriteMovie,
         description: localizations.findYourNextFavoriteMovieDesc,
-        imageUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000",
+        imageUrl: "assets/images/Movies_Posters.png",
       ),
       OnboardingItem(
         title: localizations.discoverMovies,
         description: localizations.discoverMoviesDesc,
-        imageUrl: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1000",
+        imageUrl: "assets/images/iron_movie.png",
       ),
       OnboardingItem(
         title: localizations.exploreAllGenres,
         description: localizations.exploreAllGenresDesc,
-        imageUrl: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=1000",
+        imageUrl: "assets/images/Godfather.png",
       ),
       OnboardingItem(
         title: localizations.createWatchlists,
         description: localizations.createWatchlistsDesc,
-        imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1000",
+        imageUrl: "assets/images/bad-boys-ride-or-die-movie.png",
       ),
       OnboardingItem(
         title: localizations.rateReviewAndLearn,
         description: localizations.rateReviewAndLearnDesc,
-        imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=1000",
+        imageUrl: "assets/images/Doctor_String.png",
       ),
       OnboardingItem(
         title: localizations.startWatchingNow,
         description: localizations.startWatchingNowDesc,
-        imageUrl: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?q=80&w=1000",
+        imageUrl: "assets/images/1917Film_.png",
       ),
     ];
 
@@ -96,21 +97,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(page.imageUrl, fit: BoxFit.cover),
-                  // Dark Gradient Overlay at the bottom
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.4),
-                          Colors.black.withValues(alpha: 0.9),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                  ),
+                  // Image.asset(page.imageUrl, fit: BoxFit.cover),
+                  // // Dark Gradient Overlay at the bottom
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     gradient: LinearGradient(
+                  //       colors: [
+                  //         Colors.transparent,
+                  //         Colors.black.withValues(alpha: 0.4),
+                  //         Colors.black.withValues(alpha: 0.9),
+                  //       ],
+                  //       begin: Alignment.topCenter,
+                  //       end: Alignment.bottomCenter,
+                  //     ),
+                  //   ),
+                  // ),
+                  DynamicGradientImageWidget(imageUrl: page.imageUrl)
                 ],
               );
             },
