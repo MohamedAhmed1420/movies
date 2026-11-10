@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (state is SessionAuthenticatedState) {
       Navigator.pushReplacementNamed(
         context,
-        AppRoutes.home,
+        AppRoutes.onboarding,
         arguments: state.user,
       );
     } else if (state is SessionUnauthenticatedState ||

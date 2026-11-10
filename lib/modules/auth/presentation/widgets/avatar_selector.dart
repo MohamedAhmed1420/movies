@@ -4,15 +4,15 @@ import 'package:movies/l10n/app_localizations.dart';
 
 class AvatarSelector extends StatefulWidget {
   static const List<String> avatars = [
-    'https://avatar.iran.liara.run/public/boy?username=alex',
-    'https://avatar.iran.liara.run/public/boy?username=sam',
-    'https://avatar.iran.liara.run/public/boy?username=john',
-    'https://avatar.iran.liara.run/public/girl?username=lisa',
-    'https://avatar.iran.liara.run/public/girl?username=maya',
-    'https://avatar.iran.liara.run/public/boy?username=david',
-    'https://avatar.iran.liara.run/public/girl?username=sara',
-    'https://avatar.iran.liara.run/public/boy?username=chris',
-    'https://avatar.iran.liara.run/public/girl?username=emma',
+    'https://api.dicebear.com/10.x/avataaars/png?seed=Alex&backgroundColor=b6e3f4',
+    'https://api.dicebear.com/10.x/adventurer/png?seed=Sam&backgroundColor=c0aede',
+    'https://api.dicebear.com/10.x/big-smile/png?seed=Jordan&backgroundColor=ffdfbf',
+    'https://api.dicebear.com/10.x/lorelei/png?seed=Lisa&backgroundColor=ffd5dc',
+    'https://api.dicebear.com/10.x/micah/png?seed=Maya&backgroundColor=d1f4d1',
+    'https://api.dicebear.com/10.x/notionists/png?seed=David&backgroundColor=b6e3f4',
+    'https://api.dicebear.com/10.x/croodles/png?seed=Sara&backgroundColor=ffdfbf',
+    'https://api.dicebear.com/10.x/open-peeps/png?seed=Chris&backgroundColor=c0aede',
+    'https://api.dicebear.com/10.x/fun-emoji/png?seed=Emma&backgroundColor=ffd5dc',
   ];
 
   final ValueChanged<int>? onAvatarSelected;

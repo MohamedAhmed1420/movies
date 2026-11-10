@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../modules/auth/data/data_sources/auth_remote_data_source.dart';
 import '../../modules/auth/data/repositories/auth_repository_impl.dart';
@@ -13,7 +14,10 @@ import '../../modules/auth/domain/use_cases/send_password_reset_use_case.dart';
 import '../../modules/auth/domain/use_cases/sign_in_use_case.dart';
 import '../../modules/auth/domain/use_cases/sign_out_use_case.dart';
 import '../../modules/auth/presentation/manager/auth_cubit.dart';
+import '../../modules/home/data/data_sources/movie_collection_local_data_source.dart';
 import '../../modules/home/data/data_sources/movie_remote_data_source.dart';
+import '../../modules/home/data/repositories/movie_collection_repository_impl.dart';
+import '../../modules/home/domain/repositories/movie_collection_repository.dart';
 import '../../modules/home/data/repositories/movie_repository_impl.dart';
 import '../../modules/home/domain/repositories/movie_repository.dart';
 import '../../modules/home/domain/use_cases/get_movies_use_case.dart';
@@ -50,6 +54,20 @@ void setupDependencies() {
   sl.registerLazySingleton(() => SignOutUseCase(sl<AuthRepository>()));
 
   sl.registerLazySingleton<http.Client>(() => http.Client());
+  sl.registerLazySingleton<SharedPreferencesAsync>(
+    () => SharedPreferencesAsync(),
+  );
+  sl.registerLazySingleton<MovieCollectionLocalDataSource>(
+    () => MovieCollectionLocalDataSourceImpl(
+      preferences: sl<SharedPreferencesAsync>(),
+      auth: sl<FirebaseAuth>(),
+    ),
+  );
+  sl.registerLazySingleton<MovieCollectionRepository>(
+    () => MovieCollectionRepositoryImpl(
+      localDataSource: sl<MovieCollectionLocalDataSource>(),
+    ),
+  );
   sl.registerLazySingleton<MovieRemoteDataSource>(
     () => MovieRemoteDataSourceImpl(client: sl<http.Client>()),
   );

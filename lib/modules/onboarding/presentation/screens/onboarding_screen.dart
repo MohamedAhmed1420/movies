@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:movies/core/routes/app_routes.dart';
 import 'package:movies/core/theme/app_colors.dart';
 import 'package:movies/l10n/app_localizations.dart';
+import 'package:movies/modules/auth/domain/entities/app_user.dart';
 import 'package:movies/modules/onboarding/presentation/screens/dynamic_gradient_image_widget.dart';
 import 'package:movies/modules/onboarding/presentation/screens/onboarding_item.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  final AppUser? user;
+
+  const OnboardingScreen({super.key, this.user});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -21,6 +24,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
+      );
+    } else if (widget.user != null) {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.home,
+        arguments: widget.user,
       );
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.login);

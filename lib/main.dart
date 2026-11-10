@@ -48,7 +48,12 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.dark,
             routes: {
               AppRoutes.splash: (_) => _buildSplash(),
-              AppRoutes.onboarding: (_) => const OnboardingScreen(),
+              AppRoutes.onboarding: (context) {
+                final user = ModalRoute.of(context)?.settings.arguments;
+                return OnboardingScreen(
+                  user: user is AppUser ? user : null,
+                );
+              },
               AppRoutes.login: (_) => const LoginScreen(),
               AppRoutes.register: (_) => const RegisterScreen(),
               AppRoutes.forgetPassword: (_) => const ForgetPasswordScreen(),

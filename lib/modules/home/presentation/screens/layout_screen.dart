@@ -134,7 +134,10 @@ class _LayoutScreenState extends State<LayoutScreen> {
                   onMovieTap: (movie) => _openMovieDetails(context, movie),
                 ),
               ),
-              ProfileScreen(user: widget.user),
+              ProfileScreen(
+                user: widget.user,
+                onMovieTap: (movie) => _openMovieDetails(context, movie),
+              ),
             ];
 
             return ValueListenableBuilder<String?>(

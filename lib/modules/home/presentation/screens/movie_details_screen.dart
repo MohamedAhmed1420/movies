@@ -4,6 +4,7 @@ import 'package:movies/core/di/service_locator.dart';
 import 'package:movies/core/theme/app_colors.dart';
 import 'package:movies/l10n/app_localizations.dart';
 import 'package:movies/modules/home/domain/entities/movie.dart';
+import 'package:movies/modules/home/domain/repositories/movie_collection_repository.dart';
 import 'package:movies/modules/home/domain/entities/movie_details.dart';
 import 'package:movies/modules/home/presentation/manager/movie_details_cubit.dart';
 import 'package:movies/modules/home/presentation/manager/movie_details_state.dart';
@@ -28,7 +29,11 @@ class _MovieDetailsView extends StatelessWidget {
 
   const _MovieDetailsView({required this.movie});
 
-  Future<void> _openTrailer(BuildContext context, String trailerCode) async {
+  Future<void> _openTrailer(
+    BuildContext context,
+    String trailerCode,
+    Movie movie,
+  ) async {
     final localizations = AppLocalizations.of(context)!;
     if (trailerCode.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -37,8 +42,11 @@ class _MovieDetailsView extends StatelessWidget {
       return;
     }
     final uri = Uri.https('www.youtube.com', '/watch', {'v': trailerCode});
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
-        context.mounted) {
+    final launched =
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (launched) {
+      await sl<MovieCollectionRepository>().markMovieAsWatched(movie);
+    } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(localizations.trailerUnavailable)),
       );
@@ -60,10 +68,15 @@ class _MovieDetailsView extends StatelessWidget {
               SliverToBoxAdapter(
                 child: _DetailsHero(
                   imageUrl: details?.backgroundImageUrl ?? movie.posterUrl,
+                  movie: activeMovie,
                   onBack: () => Navigator.of(context).maybePop(),
                   onPlay: details == null
                       ? null
-                      : () => _openTrailer(context, details.trailerCode),
+                      : () => _openTrailer(
+                          context,
+                          details.trailerCode,
+                          activeMovie,
+                        ),
                 ),
               ),
               SliverPadding(
@@ -102,7 +115,11 @@ class _MovieDetailsView extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: details == null
                             ? null
-                            : () => _openTrailer(context, details.trailerCode),
+                            : () => _openTrailer(
+                                context,
+                                details.trailerCode,
+                                activeMovie,
+                              ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE9292D),
                           foregroundColor: Colors.white,
@@ -192,11 +209,13 @@ class _MovieDetailsView extends StatelessWidget {
 
 class _DetailsHero extends StatefulWidget {
   final String imageUrl;
+  final Movie movie;
   final VoidCallback onBack;
   final VoidCallback? onPlay;
 
   const _DetailsHero({
     required this.imageUrl,
+    required this.movie,
     required this.onBack,
     required this.onPlay,
   });
@@ -207,6 +226,28 @@ class _DetailsHero extends StatefulWidget {
 
 class _DetailsHeroState extends State<_DetailsHero> {
   bool _isSaved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedState();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DetailsHero oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.movie.id != widget.movie.id) _loadSavedState();
+  }
+
+  Future<void> _loadSavedState() async {
+    final isSaved = await sl<MovieCollectionRepository>().isSaved(widget.movie.id);
+    if (mounted) setState(() => _isSaved = isSaved);
+  }
+
+  Future<void> _toggleSaved() async {
+    final isSaved = await sl<MovieCollectionRepository>().toggleSavedMovie(widget.movie);
+    if (mounted) setState(() => _isSaved = isSaved);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +283,7 @@ class _DetailsHeroState extends State<_DetailsHero> {
             top: MediaQuery.paddingOf(context).top + 3,
             right: 7,
             child: IconButton(
-              onPressed: () => setState(() => _isSaved = !_isSaved),
+              onPressed: _toggleSaved,
               icon: Icon(
                 _isSaved ? Icons.bookmark : Icons.bookmark_border,
                 color: Colors.white,
